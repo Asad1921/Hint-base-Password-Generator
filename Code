@@ -80,7 +80,7 @@
                 transparent 20px
             );
             overflow-y: auto;
-            height: calc(100vh - 33px); /* Subtract header height (8px padding + 16px font + 1px border + extra for safety) */
+            height: calc(100vh - 33px);
         }
         input {
             background: rgba(10, 10, 35, 0.8);
@@ -160,7 +160,6 @@
             <p class="mt-4 text-sm blink text-center">[ Secure Access - Authorized Use Only ]</p>
         </div>
     </div>
-
     <script>
         function generatePasswords() {
             const hintsInput = document.getElementById('hints').value.trim();
@@ -170,41 +169,29 @@
             const resetBtn = document.getElementById('resetBtn');
             const passwordOutput = document.getElementById('passwordOutput');
             const passwordList = document.getElementById('passwordList');
-
             if (!hintsInput) {
                 status.textContent = '[ Error: Input target data required ]';
                 return;
             }
-
-            // Split hints and filter out empty or invalid entries, limit to 100
             const hints = hintsInput.split(',').map(hint => hint.trim()).filter(hint => hint).slice(0, 100);
             if (hints.length === 0) {
                 status.textContent = '[ Error: Invalid target data ]';
                 return;
             }
-
             status.textContent = '[ Initiating password generation... ]';
             passwordOutput.classList.add('hidden');
             downloadBtn.classList.add('hidden');
             resetBtn.classList.add('hidden');
             timer.classList.remove('hidden');
-
-            // Expanded variations and symbols
             const variations = ['', '123', '456', '789', '!', '@', '#', '$', '%', '2020', '2021', '2022', '2023', '2024', '2025', '007', '99'];
             const leetMap = { 'a': '4', 'e': '3', 'i': '1', 'o': '0', 's': '5', 't': '7' };
             const passwords = new Set();
-
-            // Helper function to apply leet speak
             function toLeet(str) {
                 return str.split('').map(char => leetMap[char.toLowerCase()] || char).join('');
             }
-
-            // Estimate time (heuristic: ~0.01s per 1000 combinations)
             const estimatedCombinations = Math.min(hints.length * hints.length * variations.length * variations.length * 14, 100000);
-            let estimatedTime = Math.ceil(estimatedCombinations * 0.00001); // Seconds
+            let estimatedTime = Math.ceil(estimatedCombinations * 0.00001);
             let timeRemaining = estimatedTime;
-
-            // Update timer every second
             timer.textContent = `[ Processing: ${timeRemaining}s ]`;
             const timerInterval = setInterval(() => {
                 timeRemaining--;
@@ -214,8 +201,6 @@
                     timer.textContent = `[ Processing: ${timeRemaining}s ]`;
                 }
             }, 1000);
-
-            // Generate combinations with async to prevent UI freeze
             setTimeout(() => {
                 for (let i = 0; i < hints.length; i++) {
                     for (let j = 0; j < hints.length; j++) {
@@ -223,35 +208,27 @@
                             for (let v2 of variations) {
                                 const hint1 = hints[i];
                                 const hint2 = hints[j];
-                                // Basic combinations
                                 passwords.add(hint1 + hint2 + v1);
                                 passwords.add(hint1 + v1 + hint2);
                                 passwords.add(hint2 + hint1 + v1);
                                 passwords.add(hint1.toLowerCase() + hint2.toUpperCase() + v1);
                                 passwords.add(hint1.toUpperCase() + hint2.toLowerCase() + v1);
-                                // First letter capitalized
                                 passwords.add(hint1.charAt(0).toUpperCase() + hint1.slice(1) + hint2 + v1);
                                 passwords.add(hint2.charAt(0).toUpperCase() + hint2.slice(1) + hint1 + v1);
-                                // Reverse strings
                                 passwords.add(hint1.split('').reverse().join('') + hint2 + v1);
                                 passwords.add(hint1 + hint2.split('').reverse().join('') + v1);
-                                // Mixed variations
                                 passwords.add(hint1 + v1 + hint2 + v2);
                                 passwords.add(hint2 + v1 + hint1 + v2);
-                                // Leet speak variations
                                 passwords.add(toLeet(hint1) + hint2 + v1);
                                 passwords.add(hint1 + toLeet(hint2) + v1);
                                 passwords.add(toLeet(hint1) + toLeet(hint2) + v1);
-                                // Substring combinations (for longer hints)
                                 if (hint1.length > 3) passwords.add(hint1.slice(0, 3) + hint2 + v1);
                                 if (hint2.length > 3) passwords.add(hint1 + hint2.slice(0, 3) + v1);
-                                // Single hint with variations
                                 passwords.add(hint1 + v1);
                                 passwords.add(toLeet(hint1) + v1);
                                 passwords.add(hint1.toUpperCase() + v1);
                                 passwords.add(hint1.toLowerCase() + v1);
                                 passwords.add(hint1.charAt(0).toUpperCase() + hint1.slice(1) + v1);
-                                // Break early if exceeding 100,000
                                 if (passwords.size >= 100000) break;
                             }
                             if (passwords.size >= 100000) break;
@@ -260,8 +237,6 @@
                     }
                     if (passwords.size >= 100000) break;
                 }
-
-                // If fewer than 10 passwords, add more
                 while (passwords.size < 10 && hints.length > 0) {
                     const randomHint = hints[Math.floor(Math.random() * hints.length)];
                     const randomVar1 = variations[Math.floor(Math.random() * variations.length)];
@@ -271,22 +246,14 @@
                     passwords.add(randomHint.split('').reverse().join('') + randomVar2);
                     if (passwords.size >= 100000) break;
                 }
-
-                // Convert Set to Array and limit to 100,000
                 const passwordArray = Array.from(passwords).slice(0, 100000);
-
-                // Stop timer
                 clearInterval(timerInterval);
                 timer.classList.add('hidden');
-
-                // Display passwords in textarea
                 passwordList.value = passwordArray.join('\n');
                 status.textContent = `[ Generated ${passwordArray.length} passwords ]`;
                 passwordOutput.classList.remove('hidden');
                 downloadBtn.classList.remove('hidden');
                 resetBtn.classList.remove('hidden');
-
-                // Create download link
                 const blob = new Blob([passwordArray.join('\n')], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 downloadBtn.onclick = () => {
@@ -296,9 +263,8 @@
                     a.click();
                     URL.revokeObjectURL(url);
                 };
-            }, 0); // Run in next event loop to allow UI update
+            }, 0);
         }
-
         function resetForm() {
             const hintsInput = document.getElementById('hints');
             const status = document.getElementById('status');
@@ -307,8 +273,6 @@
             const resetBtn = document.getElementById('resetBtn');
             const passwordOutput = document.getElementById('passwordOutput');
             const passwordList = document.getElementById('passwordList');
-
-            // Clear all fields and reset UI
             hintsInput.value = '';
             status.textContent = '';
             timer.classList.add('hidden');
