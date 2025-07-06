@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Password Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(180deg, #0a0a23 0%, #1b1b4f 50%, #0a0a23 100%);
+            font-family: 'Roboto Mono', monospace;
+            color: #00e1ff;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .terminal {
+            background: rgba(10, 10, 35, 0.95);
+            border: 2px solid #00e1ff;
+            box-shadow: 0 0 30px rgba(0, 225, 255, 0.3), inset 0 0 10px rgba(0, 225, 255, 0.1);
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        .terminal-header {
+            background: linear-gradient(90deg, #1b1b4f, #2a2a7a);
+            padding: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            color: #00e1ff;
+            text-align: center;
+            border-bottom: 1px solid #00e1ff;
+            position: relative;
+            z-index: 10;
+        }
+        .terminal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(0, 225, 255, 0.2), transparent);
+            animation: scanline 4s linear infinite;
+        }
+        @keyframes scanline {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .blink {
+            animation: blink 0.8s step-end infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        input, button, textarea {
+            font-family: 'Roboto Mono', monospace;
+            transition: all 0.3s ease;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(0, 225, 255, 0.05),
+                rgba(0, 225, 255, 0.05) 10px,
+                transparent 10px,
+                transparent 20px
+            );
+            overflow-y: auto;
+            height: calc(100vh - 33px); /* Subtract header height (8px padding + 16px font + 1px border + extra for safety) */
+        }
+        input {
+            background: rgba(10, 10, 35, 0.8);
+            border: 1px solid #00e1ff;
+            color: #00e1ff;
+            padding: 0.75rem;
+            border-radius: 4px;
+            outline: none;
+        }
+        input:focus {
+            box-shadow: 0 0 10px #00e1ff;
+        }
+        button {
+            background: #00e1ff;
+            color: #0a0a23;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        button:hover {
+            background: #00b8d4;
+            box-shadow: 0 0 15px rgba(0, 225, 255, 0.5);
+        }
+        button#resetBtn {
+            background: #ff3d3d;
+        }
+        button#resetBtn:hover {
+            background: #d32f2f;
+            box-shadow: 0 0 15px rgba(255, 61, 61, 0.5);
+        }
+        textarea {
+            resize: none;
+            background: rgba(10, 10, 35, 0.8);
+            border: 1px solid #00e1ff;
+            color: #00e1ff;
+            border-radius: 4px;
+            padding: 0.75rem;
+        }
+        textarea:focus {
+            outline: none;
+            box-shadow: 0 0 10px #00e1ff;
+        }
+        .content::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><text x="10" y="50" font-family="Roboto Mono" font-size="12" fill="#00e1ff">HACK</text></svg>') repeat;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="terminal-header">Hacker Terminal v2.0 - Cyberzaad's Password Generator</div>
+        <div class="content">
+            <h1 class="text-3xl font-bold mb-4 text-center font-orbitron">[ Cyber Password Forge ]</h1>
+            <div class="mb-4">
+                <label class="block text-sm font-medium">Input Target Data (comma-separated, max 100)</label>
+                <input type="text" id="hints" class="mt-1 p-2 w-full" placeholder="e.g., Asad,Matrix,2006,Trinity,namal">
+            </div>
+            <div class="flex gap-2">
+                <button onclick="generatePasswords()" class="w-full">Initiate Process</button>
+                <button onclick="resetForm()" id="resetBtn" class="w-full hidden">Clear System</button>
+            </div>
+            <p id="status" class="mt-4 text-sm"></p>
+            <p id="timer" class="mt-2 text-sm hidden">[ Processing: Calculating... ]</p>
+            <div id="passwordOutput" class="mt-4 hidden">
+                <h2 class="text-lg font-semibold font-orbitron">[ Decrypted Passwords ]</h2>
+                <textarea id="passwordList" class="w-full h-64 mt-2 p-2" readonly></textarea>
+                <button id="downloadBtn" class="w-full mt-2">Extract Data</button>
+            </div>
+            <p class="mt-4 text-sm blink text-center">[ Secure Access - Authorized Use Only ]</p>
+        </div>
+    </div>
+
+    <script>
+        function generatePasswords() {
+            const hintsInput = document.getElementById('hints').value.trim();
+            const status = document.getElementById('status');
+            const timer = document.getElementById('timer');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const passwordOutput = document.getElementById('passwordOutput');
+            const passwordList = document.getElementById('passwordList');
+
+            if (!hintsInput) {
+                status.textContent = '[ Error: Input target data required ]';
+                return;
+            }
+
+            // Split hints and filter out empty or invalid entries, limit to 100
+            const hints = hintsInput.split(',').map(hint => hint.trim()).filter(hint => hint).slice(0, 100);
+            if (hints.length === 0) {
+                status.textContent = '[ Error: Invalid target data ]';
+                return;
+            }
+
+            status.textContent = '[ Initiating password generation... ]';
+            passwordOutput.classList.add('hidden');
+            downloadBtn.classList.add('hidden');
+            resetBtn.classList.add('hidden');
+            timer.classList.remove('hidden');
+
+            // Expanded variations and symbols
+            const variations = ['', '123', '456', '789', '!', '@', '#', '$', '%', '2020', '2021', '2022', '2023', '2024', '2025', '007', '99'];
+            const leetMap = { 'a': '4', 'e': '3', 'i': '1', 'o': '0', 's': '5', 't': '7' };
+            const passwords = new Set();
+
+            // Helper function to apply leet speak
+            function toLeet(str) {
+                return str.split('').map(char => leetMap[char.toLowerCase()] || char).join('');
+            }
+
+            // Estimate time (heuristic: ~0.01s per 1000 combinations)
+            const estimatedCombinations = Math.min(hints.length * hints.length * variations.length * variations.length * 14, 100000);
+            let estimatedTime = Math.ceil(estimatedCombinations * 0.00001); // Seconds
+            let timeRemaining = estimatedTime;
+
+            // Update timer every second
+            timer.textContent = `[ Processing: ${timeRemaining}s ]`;
+            const timerInterval = setInterval(() => {
+                timeRemaining--;
+                if (timeRemaining <= 0) {
+                    timer.textContent = '[ Finalizing decryption... ]';
+                } else {
+                    timer.textContent = `[ Processing: ${timeRemaining}s ]`;
+                }
+            }, 1000);
+
+            // Generate combinations with async to prevent UI freeze
+            setTimeout(() => {
+                for (let i = 0; i < hints.length; i++) {
+                    for (let j = 0; j < hints.length; j++) {
+                        for (let v1 of variations) {
+                            for (let v2 of variations) {
+                                const hint1 = hints[i];
+                                const hint2 = hints[j];
+                                // Basic combinations
+                                passwords.add(hint1 + hint2 + v1);
+                                passwords.add(hint1 + v1 + hint2);
+                                passwords.add(hint2 + hint1 + v1);
+                                passwords.add(hint1.toLowerCase() + hint2.toUpperCase() + v1);
+                                passwords.add(hint1.toUpperCase() + hint2.toLowerCase() + v1);
+                                // First letter capitalized
+                                passwords.add(hint1.charAt(0).toUpperCase() + hint1.slice(1) + hint2 + v1);
+                                passwords.add(hint2.charAt(0).toUpperCase() + hint2.slice(1) + hint1 + v1);
+                                // Reverse strings
+                                passwords.add(hint1.split('').reverse().join('') + hint2 + v1);
+                                passwords.add(hint1 + hint2.split('').reverse().join('') + v1);
+                                // Mixed variations
+                                passwords.add(hint1 + v1 + hint2 + v2);
+                                passwords.add(hint2 + v1 + hint1 + v2);
+                                // Leet speak variations
+                                passwords.add(toLeet(hint1) + hint2 + v1);
+                                passwords.add(hint1 + toLeet(hint2) + v1);
+                                passwords.add(toLeet(hint1) + toLeet(hint2) + v1);
+                                // Substring combinations (for longer hints)
+                                if (hint1.length > 3) passwords.add(hint1.slice(0, 3) + hint2 + v1);
+                                if (hint2.length > 3) passwords.add(hint1 + hint2.slice(0, 3) + v1);
+                                // Single hint with variations
+                                passwords.add(hint1 + v1);
+                                passwords.add(toLeet(hint1) + v1);
+                                passwords.add(hint1.toUpperCase() + v1);
+                                passwords.add(hint1.toLowerCase() + v1);
+                                passwords.add(hint1.charAt(0).toUpperCase() + hint1.slice(1) + v1);
+                                // Break early if exceeding 100,000
+                                if (passwords.size >= 100000) break;
+                            }
+                            if (passwords.size >= 100000) break;
+                        }
+                        if (passwords.size >= 100000) break;
+                    }
+                    if (passwords.size >= 100000) break;
+                }
+
+                // If fewer than 10 passwords, add more
+                while (passwords.size < 10 && hints.length > 0) {
+                    const randomHint = hints[Math.floor(Math.random() * hints.length)];
+                    const randomVar1 = variations[Math.floor(Math.random() * variations.length)];
+                    const randomVar2 = variations[Math.floor(Math.random() * variations.length)];
+                    passwords.add(randomHint + randomVar1 + randomVar2);
+                    passwords.add(toLeet(randomHint) + randomVar1);
+                    passwords.add(randomHint.split('').reverse().join('') + randomVar2);
+                    if (passwords.size >= 100000) break;
+                }
+
+                // Convert Set to Array and limit to 100,000
+                const passwordArray = Array.from(passwords).slice(0, 100000);
+
+                // Stop timer
+                clearInterval(timerInterval);
+                timer.classList.add('hidden');
+
+                // Display passwords in textarea
+                passwordList.value = passwordArray.join('\n');
+                status.textContent = `[ Generated ${passwordArray.length} passwords ]`;
+                passwordOutput.classList.remove('hidden');
+                downloadBtn.classList.remove('hidden');
+                resetBtn.classList.remove('hidden');
+
+                // Create download link
+                const blob = new Blob([passwordArray.join('\n')], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                downloadBtn.onclick = () => {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'passwords.txt';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                };
+            }, 0); // Run in next event loop to allow UI update
+        }
+
+        function resetForm() {
+            const hintsInput = document.getElementById('hints');
+            const status = document.getElementById('status');
+            const timer = document.getElementById('timer');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const passwordOutput = document.getElementById('passwordOutput');
+            const passwordList = document.getElementById('passwordList');
+
+            // Clear all fields and reset UI
+            hintsInput.value = '';
+            status.textContent = '';
+            timer.classList.add('hidden');
+            passwordOutput.classList.add('hidden');
+            downloadBtn.classList.add('hidden');
+            resetBtn.classList.add('hidden');
+            passwordList.value = '';
+        }
+    </script>
+</body>
+</html>
