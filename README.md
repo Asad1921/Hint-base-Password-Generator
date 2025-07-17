@@ -23,8 +23,13 @@ Export Functionality: Allows users to view the generated passwords and download 
 
 
 Key Features
+
 🟦 Web-Based & User-Friendly: Accessible via browser with an intuitive interface.
+
 🟦 Customizable Attacks: Supports dictionary-based, hint-based, and brute force attacks.
+
 🟦Large Password Database: Preloaded with thousands of common passwords for efficient cracking.
+
 🟦 Export & Reuse: Generates password lists for external cracking tools.
+
 🟦 Security Considerations: Designed for ethical use (e.g., password recovery for legitimate purposes).
