@@ -21,6 +21,8 @@ Hint-Based Password Generation: Users can input hints (e.g., personal details, c
 
 Export Functionality: Allows users to view the generated passwords and download them as a .txt file for use in other password-cracking tools like Hashcat, John the Ripper, or similar.
 
+https://asadkhan.kesug.com/zaad/crackv1/
+
 
 Key Features
 
@@ -33,3 +35,5 @@ Key Features
 🟦 Export & Reuse: Generates password lists for external cracking tools.
 
 🟦 Security Considerations: Designed for ethical use (e.g., password recovery for legitimate purposes).
+
+
