@@ -3,7 +3,7 @@ This is hint based Password Generator .IN this Graphical user interface a web ba
 This project is a web-based tool designed to assist in password recovery for protected files (such as ZIP, PDF, etc.) and generate password combinations based on user-provided hints. It supports two main functionalities:
 
 
-2. Password Generator
+1. Password Generator
 
 
 
